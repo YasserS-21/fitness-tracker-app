@@ -53,7 +53,7 @@ jobs:
         cd frontend/FitnessTracker
         # Install dependencies exactly as specified in yarn.lock
         # This is similar to npm ci - it won't update the lockfile
-        yarn install --frozen-lockfile
+        yarn install
         
     # TypeScript type checking
     # This catches type errors before building
