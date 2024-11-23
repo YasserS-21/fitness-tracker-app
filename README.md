@@ -6,9 +6,16 @@ This project aims to develop a fitness tracker mobile application to help users 
 
 ### **How to run the project**
 
-- npm run android
-- npm run ios # you need to use macOS to build the iOS project - use the Expo app if you need to do iOS development without a Mac
-- npm run web
+- **Using npm:**
+
+  - npm run android
+  - npm run ios # you need to use macOS to build the iOS project - use the Expo app if you need to do iOS development without a Mac
+  - npm run web
+
+- **Using Yarn:**
+  - yarn android
+  - yarn ios # you need to use macOS to build the iOS project - use the Expo app if you need to do iOS development without a Mac
+  - yarn web
 
 ### **Technology Stack**
 
