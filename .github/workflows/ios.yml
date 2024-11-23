@@ -4,77 +4,84 @@ name: FitnessTracker Expo CI
 # Defines when this workflow will run
 on:
   push:
-    # Runs whenever code is pushed to the main branch
-    branches: [ "main" ]
+    branches: [ "main" ]  # Triggers when any commit is pushed to main branch
   pull_request:
-    # Runs when someone creates a pull request to merge into main
-    branches: [ "main" ]
+    branches: [ "main" ]  # Triggers when a PR is created targeting main branch
 
-# Groups of actions that will run
 jobs:
-  # Name of this job
+  # Each job runs in a fresh virtual environment
   build-and-test:
-    # Specifies which type of virtual machine to run on
-    # Ubuntu is cheaper than macOS and works fine for Expo
+    # Ubuntu is chosen because:
+    # 1. It's cheaper than macOS runners
+    # 2. Sufficient for Expo builds
+    # 3. Has faster startup times
     runs-on: ubuntu-latest
     
-    # List of steps to perform, in order
     steps:
-    # Step 1: Get a copy of your code
-    - name: Checkout code  # Name that appears in the Actions UI
-      uses: actions/checkout@v3  # Uses an existing Action from GitHub marketplace
+    # Checkout is always the first step
+    # It copies your repository code into the CI environment
+    - name: Checkout code
+      uses: actions/checkout@v3  # v3 is the version of the action
     
-    # Step 2: Set up Node.js environment
+    # Sets up Node.js and configures Yarn caching
+    # Caching speeds up builds by saving node_modules between runs
     - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with: # Configuration options for this action
-        node-version: '18'
-        cache: 'yarn'  # Yarn has better built-in caching
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'  # Specify Node.js version
+        cache: 'yarn'  # Enable caching for Yarn dependencies
+        cache-dependency-path: frontend/FitnessTracker/yarn.lock
         
-    # Step 3: Install Yarn globally
+    # Install Yarn package manager globally
+    # This is needed because we're using Yarn instead of npm
     - name: Install Yarn
-      run: npm install -g yarn
+      run: npm install -g yarn  # -g means install globally
         
-    # Step 4: Set up Expo CLI
+    # Set up Expo CLI for building React Native app
+    # This step is specific to Expo/React Native projects
     - name: Setup Expo
       uses: expo/expo-github-action@v8
       with:
-        expo-version: latest # Use the latest version of Expo CLI
-        token: ${{ secrets.EXPO_TOKEN }} # Optional: Only needed for deployments
+        expo-version: latest  # Always use latest Expo version
+        token: ${{ secrets.EXPO_TOKEN }}  # Access token for Expo account
         
-    # Step 5: Install dependencies using Yarn
+    # Install project dependencies using Yarn
+    # --frozen-lockfile ensures exact versions from yarn.lock
     - name: Install dependencies
-      # The pipe symbol | lets you run multiple lines of commands
-      run: |
-        # Navigate to your project directory
+      run: |  # The | allows multiple lines of commands
+        # First navigate to project directory
         cd frontend/FitnessTracker
-        # Install all dependencies defined in package.json
-        yarn install --frozen-lockfile  # (--frozen-lockfile) similar to npm ci, ensures exact versions)
-
-    # Step 6: Check TypeScript types
+        # Install dependencies exactly as specified in yarn.lock
+        # This is similar to npm ci - it won't update the lockfile
+        yarn install --frozen-lockfile
+        
+    # TypeScript type checking
+    # This catches type errors before building
     - name: Run type checking
       run: |
         cd frontend/FitnessTracker
-        # Runs TypeScript compiler to check for type errors
-        # --noEmit means "don't create output files, just check types"
+        # --noEmit means check types without generating JS files
         yarn tsc --noEmit
-
-    # Step 7: Build a preview of the app
+        
+    # Build a preview version of the app
+    # This step creates the necessary native projects
     - name: Build preview
       run: |
         cd frontend/FitnessTracker
-        # Creates necessary native iOS/Android projects
+        # prebuild creates iOS/Android native projects
+        # --platform ios specifies we want iOS build
         yarn expo prebuild --platform ios
 
-    # test running step when you have tests
+    # Commented out test step - uncomment when you add tests
     # - name: Run tests
     #   run: |
     #     cd frontend/FitnessTracker
     #     yarn test
 
-    # Optional: Add step to save build artifacts
+    # Optional: Save build output for debugging or deployment
+    # This step saves the build artifacts for later access
     # - name: Save Build Output
     #   uses: actions/upload-artifact@v3
     #   with:
-    #     name: app-build
-    #     path: frontend/FitnessTracker/ios/build
+    #     name: app-build  # Name of the saved artifact
+    #     path: frontend/FitnessTracker/ios/build  # What to save
