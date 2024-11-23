@@ -1,0 +1,80 @@
+# Name that appears in GitHub Actions tab
+name: FitnessTracker Expo CI
+
+# Defines when this workflow will run
+on:
+  push:
+    # Runs whenever code is pushed to the main branch
+    branches: [ "main" ]
+  pull_request:
+    # Runs when someone creates a pull request to merge into main
+    branches: [ "main" ]
+
+# Groups of actions that will run
+jobs:
+  # Name of this job
+  build-and-test:
+    # Specifies which type of virtual machine to run on
+    # Ubuntu is cheaper than macOS and works fine for Expo
+    runs-on: ubuntu-latest
+    
+    # List of steps to perform, in order
+    steps:
+    # Step 1: Get a copy of your code
+    - name: Checkout code  # Name that appears in the Actions UI
+      uses: actions/checkout@v3  # Uses an existing Action from GitHub marketplace
+    
+    # Step 2: Set up Node.js environment
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with: # Configuration options for this action
+        node-version: '18'
+        cache: 'yarn'  # Yarn has better built-in caching
+        
+    # Step 3: Install Yarn globally
+    - name: Install Yarn
+      run: npm install -g yarn
+        
+    # Step 4: Set up Expo CLI
+    - name: Setup Expo
+      uses: expo/expo-github-action@v8
+      with:
+        expo-version: latest # Use the latest version of Expo CLI
+        token: ${{ secrets.EXPO_TOKEN }} # Optional: Only needed for deployments
+        
+    # Step 5: Install dependencies using Yarn
+    - name: Install dependencies
+      # The pipe symbol | lets you run multiple lines of commands
+      run: |
+        # Navigate to your project directory
+        cd frontend/FitnessTracker
+        # Install all dependencies defined in package.json
+        yarn install --frozen-lockfile  # (--frozen-lockfile) similar to npm ci, ensures exact versions)
+
+    # Step 6: Check TypeScript types
+    - name: Run type checking
+      run: |
+        cd frontend/FitnessTracker
+        # Runs TypeScript compiler to check for type errors
+        # --noEmit means "don't create output files, just check types"
+        yarn tsc --noEmit
+
+    # Step 7: Build a preview of the app
+    - name: Build preview
+      run: |
+        cd frontend/FitnessTracker
+        # Creates necessary native iOS/Android projects
+        yarn expo prebuild --platform ios
+
+    # test running step when you have tests
+    # - name: Run tests
+    #   run: |
+    #     cd frontend/FitnessTracker
+    #     yarn test
+
+    # Optional: Add step to save build artifacts
+    # - name: Save Build Output
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: app-build
+    #     path: frontend/FitnessTracker/ios/build

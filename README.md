@@ -4,6 +4,12 @@
 
 This project aims to develop a fitness tracker mobile application to help users track their workouts, nutrition, and overall fitness progress. The app will leverage a microservices architecture, with each service responsible for a specific functionality.
 
+### **How to run the project**
+
+- npm run android
+- npm run ios # you need to use macOS to build the iOS project - use the Expo app if you need to do iOS development without a Mac
+- npm run web
+
 ### **Technology Stack**
 
 - **Frontend:** React Native
