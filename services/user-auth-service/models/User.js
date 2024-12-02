@@ -32,20 +32,20 @@ const userSchema = new mongoose.Schema({
     gender: {
         type: String,
         enum: ['male', 'female', 'other'],
-        required: true,
+        required: false,
     },
     height: {
         type: Number, // Height in centimeters
-        required: true,
+        required: false,
     },
     weight: {
         type: Number, // Weight in kilograms
-        required: true,
+        required: false,
     },
     activityLevel: {
         type: String,
         enum: ['sedentary', 'lightly active', 'active', 'moderately active', 'very active'],
-        required: true,
+        required: false,
     },
     createdAt: {
         type: Date,
